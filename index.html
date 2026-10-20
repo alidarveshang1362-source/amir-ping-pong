@@ -29,6 +29,7 @@ button{border:0;border-radius:12px;padding:13px 18px;margin:6px;background:#e000
 <div id="hud">🔴 <span id="s1">0</span> — <span id="s2">0</span> 🔵</div>
 <div id="touch"></div>
 <button id="back" class="secondary" style="display:none">منو</button>
+
 <div id="menu">
 <div class="box">
 <h1>🏓 پینگ‌پنگ</h1>
@@ -40,6 +41,7 @@ button{border:0;border-radius:12px;padding:13px 18px;margin:6px;background:#e000
 <p style="font-size:13px">در دونفره، هر بازیکن نیمه خودش را لمس و راکت را حرکت می‌دهد.</p>
 </div>
 </div>
+
 <div id="over" style="display:none">
 <div class="box">
 <h1 id="winner">🏆</h1>
@@ -51,103 +53,231 @@ button{border:0;border-radius:12px;padding:13px 18px;margin:6px;background:#e000
 </div>
 
 <script>
-const c=document.getElementById("game"),x=c.getContext("2d"),W=720,H=900,pw=150,ph=18;
-let mode="bot",run=false,raf,last=0,a={x:285,y:55},b={x:285,y:827},ball={x:360,y:450,vx:5,vy:6,r:10},s1=0,s2=0;
-function clamp(p){p.x=Math.max(10,Math.min(W-pw-10,p.x))}
-function score(){s1El.textContent=s1;s2El.textContent=s2}
-const s1El=document.getElementById("s1"),s2El=document.getElementById("s2");
-function resetBall(d){ball={x:360,y:450,vx:(Math.random()-.5)*7,vy:d*6,r:10}}
-function reset(){s1=s2=0;a.x=b.x=285;resetBall(Math.random()<.5?1:-1);score()}
-function start(m){
-mode=m;reset();run=true;
-menu.style.display="none";over.style.display="none";
-back.style.display="block";last=performance.now();
-cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)
+const c=document.getElementById("game"),
+x=c.getContext("2d"),W=720,H=900,pw=150,ph=18;
+
+let mode="bot",run=false,raf,last=0,
+a={x:285,y:55},b={x:285,y:827},
+ball={x:360,y:450,vx:5,vy:6,r:10},s1=0,s2=0;
+
+function clamp(p){
+p.x=Math.max(10,Math.min(W-pw-10,p.x))
 }
+
+function score(){
+s1El.textContent=s1;
+s2El.textContent=s2
+}
+
+const s1El=document.getElementById("s1"),
+s2El=document.getElementById("s2");
+
+function resetBall(d){
+ball={x:360,y:450,vx:(Math.random()-.5)*7,vy:d*6,r:10}
+}
+
+function reset(){
+s1=s2=0;
+a.x=b.x=285;
+resetBall(Math.random()<.5?1:-1);
+score()
+}
+
+function start(m){
+mode=m;
+reset();
+run=true;
+menu.style.display="none";
+over.style.display="none";
+back.style.display="block";
+last=performance.now();
+cancelAnimationFrame(raf);
+raf=requestAnimationFrame(loop)
+}
+
 function point(n){
-n===1?s1++:s2++;score();
+n===1?s1++:s2++;
+score();
+
 if(s1>=7||s2>=7){
 run=false;
-winner.textContent=s1>s2?"🏆 بازیکن قرمز برنده شد!":"🏆 بازیکن آبی برنده شد!";
+winner.textContent=s1>s2?
+"🏆 بازیکن قرمز برنده شد!":
+"🏆 بازیکن آبی برنده شد!";
 result.textContent=`نتیجه: ${s1} — ${s2}`;
 over.style.display="flex"
-}else resetBall(n===1?-1:1)
+}else{
+resetBall(n===1?-1:1)
 }
+}
+
 function upd(dt){
 if(mode==="bot"){
 let t=ball.x-pw/2,m=10*dt;
-a.x+=Math.max(-m,Math.min(m,t-a.x));clamp(a)
+a.x+=Math.max(-m,Math.min(m,t-a.x));
+clamp(a)
 }
-ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
-if(ball.x<18){ball.x=18;ball.vx=Math.abs(ball.vx)}
-if(ball.x>W-18){ball.x=W-18;ball.vx=-Math.abs(ball.vx)}
-if(ball.vy<0&&ball.y-ball.r<=a.y+ph&&ball.y+ball.r>=a.y&&ball.x>=a.x&&ball.x<=a.x+pw){
+
+ball.x+=ball.vx*dt;
+ball.y+=ball.vy*dt;
+
+if(ball.x<18){
+ball.x=18;
+ball.vx=Math.abs(ball.vx)
+}
+
+if(ball.x>W-18){
+ball.x=W-18;
+ball.vx=-Math.abs(ball.vx)
+}
+
+if(ball.vy<0&&ball.y-ball.r<=a.y+ph&&
+ball.y+ball.r>=a.y&&ball.x>=a.x&&ball.x<=a.x+pw){
 let h=(ball.x-(a.x+pw/2))/(pw/2);
-ball.vx=h*7.5;ball.vy=Math.abs(ball.vy)*1.035
+ball.vx=h*7.5;
+ball.vy=Math.abs(ball.vy)*1.035
 }
-if(ball.vy>0&&ball.y+ball.r>=b.y&&ball.y-ball.r<=b.y+ph&&ball.x>=b.x&&ball.x<=b.x+pw){
+
+if(ball.vy>0&&ball.y+ball.r>=b.y&&
+ball.y-ball.r<=b.y+ph&&ball.x>=b.x&&ball.x<=b.x+pw){
 let h=(ball.x-(b.x+pw/2))/(pw/2);
-ball.vx=h*7.5;ball.vy=-Math.abs(ball.vy)*1.035
+ball.vx=h*7.5;
+ball.vy=-Math.abs(ball.vy)*1.035
 }
+
 if(ball.y<-30)point(2);
 if(ball.y>H+30)point(1)
 }
+
 function draw(){
-x.clearRect(0,0,W,H);x.fillStyle="#111";x.fillRect(0,0,W,H);
-x.setLineDash([16,18]);x.strokeStyle="#555";x.lineWidth=3;
-x.beginPath();x.moveTo(20,450);x.lineTo(700,450);x.stroke();x.setLineDash([]);
-x.strokeStyle="#333";x.strokeRect(8,8,704,884);
-x.fillStyle="#e00000";x.fillRect(a.x,a.y,pw,ph);
-x.fillStyle="#168cff";x.fillRect(b.x,b.y,pw,ph);
-x.beginPath();x.arc(ball.x,ball.y,ball.r,0,7);x.fillStyle="#fff";x.fill()
+x.clearRect(0,0,W,H);
+x.fillStyle="#111";
+x.fillRect(0,0,W,H);
+
+x.setLineDash([16,18]);
+x.strokeStyle="#555";
+x.lineWidth=3;
+x.beginPath();
+x.moveTo(20,450);
+x.lineTo(700,450);
+x.stroke();
+x.setLineDash([]);
+
+x.strokeStyle="#333";
+x.strokeRect(8,8,704,884);
+
+x.fillStyle="#e00000";
+x.fillRect(a.x,a.y,pw,ph);
+
+x.fillStyle="#168cff";
+x.fillRect(b.x,b.y,pw,ph);
+
+x.beginPath();
+x.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
+x.fillStyle="#fff";
+x.fill()
 }
+
 function loop(t){
 if(!run)return;
-let dt=Math.min(2,(t-last)/16.67);last=t;
-upd(dt);draw();raf=requestAnimationFrame(loop)
+let dt=Math.min(2,(t-last)/16.67);
+last=t;
+upd(dt);
+draw();
+raf=requestAnimationFrame(loop)
 }
+
 function setP(px,which){
-let r=c.getBoundingClientRect(),v=(px-r.left)*W/r.width-pw/2;
-if(which===1)a.x=v;else b.x=v;
+let r=c.getBoundingClientRect(),
+v=(px-r.left)*W/r.width-pw/2;
+
+if(which===1)a.x=v;
+else b.x=v;
+
 clamp(which===1?a:b)
 }
+
 let drag=null,touch=document.getElementById("touch");
+
 touch.ontouchstart=e=>{
-e.preventDefault();let r=c.getBoundingClientRect(),q=e.changedTouches[0];
-drag=q.identifier;setP(q.clientX,mode==="bot"?2:(q.clientY-r.top<r.height/2?1:2))
+e.preventDefault();
+let r=c.getBoundingClientRect(),
+q=e.changedTouches[0];
+
+drag=q.identifier;
+setP(q.clientX,mode==="bot"?2:
+(q.clientY-r.top<r.height/2?1:2))
 };
+
 touch.ontouchmove=e=>{
 e.preventDefault();
-for(let q of e.changedTouches)if(q.identifier===drag){
+
+for(let q of e.changedTouches){
+if(q.identifier===drag){
 let r=c.getBoundingClientRect();
-setP(q.clientX,mode==="bot"?2:(q.clientY-r.top<r.height/2?1:2))
+setP(q.clientX,mode==="bot"?2:
+(q.clientY-r.top<r.height/2?1:2))
+}
 }
 };
+
 touch.ontouchend=()=>drag=null;
-document.querySelectorAll("[data-mode]").forEach(z=>z.onclick=()=>start(z.dataset.mode));
+
+document.querySelectorAll("[data-mode]").forEach(z=>{
+z.onclick=()=>start(z.dataset.mode)
+});
+
 again.onclick=()=>start(mode);
-home.onclick=()=>{run=false;over.style.display="none";menu.style.display="flex";back.style.display="none"};
+
+home.onclick=()=>{
+run=false;
+over.style.display="none";
+menu.style.display="flex";
+back.style.display="none"
+};
+
 back.onclick=home.onclick;
 draw();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-#ppOnlineLayer{position:fixed;inset:0;z-index:2147483640;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.86);direction:rtl;font-family:Arial,sans-serif}
-#ppOnlineCard{width:min(410px,94vw);padding:22px;border-radius:22px;background:#171717;color:#fff;text-align:center;box-sizing:border-box}
-#ppOnlineCard button,#ppOnlineCard input{width:100%;box-sizing:border-box;padding:13px;margin:6px 0;border:0;border-radius:12px;font-size:16px}
+#ppOnlineLayer{
+position:fixed;inset:0;z-index:2147483640;
+display:none;align-items:center;justify-content:center;
+background:rgba(0,0,0,.86);direction:rtl;
+font-family:Arial,sans-serif
+}
+#ppOnlineCard{
+width:min(410px,94vw);padding:22px;
+border-radius:22px;background:#171717;color:#fff;
+text-align:center;box-sizing:border-box
+}
+#ppOnlineCard button,#ppOnlineCard input{
+width:100%;box-sizing:border-box;padding:13px;
+margin:6px 0;border:0;border-radius:12px;font-size:16px
+}
 #ppCode{font-size:38px;font-weight:900;letter-spacing:8px;margin:12px}
 #ppStatus{min-height:25px;font-size:13px;margin:8px}
-#ppOnlineOpen{position:fixed;left:12px;bottom:18px;z-index:2147483630;padding:12px 16px;border:0;border-radius:14px;font-weight:800;font-size:15px}
+#ppOnlineOpen{
+position:fixed;left:12px;bottom:18px;z-index:2147483630;
+padding:12px 16px;border:0;border-radius:14px;
+font-weight:800;font-size:15px
+}
 </style>
+
 <div id="ppOnlineLayer">
 <div id="ppOnlineCard">
 <h2>🌐 پینگ‌پنگ آنلاین</h2>
 <button id="ppCreate">🏠 ساخت اتاق</button>
+
 <div id="ppRoomBox" style="display:none">
-<div>کد اتاق:</div><div id="ppCode">-----</div>
+<div>کد اتاق:</div>
+<div id="ppCode">-----</div>
 <button id="ppCopy">📋 کپی کد</button>
 </div>
+
 <input id="ppJoinInput" maxlength="5" placeholder="کد اتاق دوستت">
 <button id="ppJoin">🚪 ورود به اتاق</button>
 <div id="ppStatus">اتاق بساز یا وارد اتاق دوستت شو.</div>
@@ -159,144 +289,337 @@ draw();
 (function(){
 const SB_URL="https://bfblbmvrmwuwceghoqet.supabase.co";
 const SB_KEY="sb_publishable_BpQzudTwE6pAGVHe9whOiA_LPJo2si3";
-let sb=null,ch=null,role=null,room=null,guestX=.5,localX=.5,online=false;
+
+let sb=null,ch=null,role=null,room=null,
+guestX=.5,localX=.5,online=false;
+
 const $=id=>document.getElementById(id);
 const status=t=>$("ppStatus").textContent=t;
-function code(){
-const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-let x="";for(let i=0;i<5;i++)x+=a[Math.floor(Math.random()*a.length)];
-return x
-}
-function open(){$("ppOnlineLayer").style.display="flex"}
-function close(){$("ppOnlineLayer").style.display="none"}
 
-async function setup(code,who){
-role=who;room=code;online=false;
+function code(){
+const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+let result="";
+for(let i=0;i<5;i++){
+result+=chars[Math.floor(Math.random()*chars.length)]
+}
+return result
+}
+
+function open(){
+$("ppOnlineLayer").style.display="flex"
+}
+
+function close(){
+$("ppOnlineLayer").style.display="none"
+}
+
+async function setup(roomCode,who){
+role=who;
+room=roomCode;
+online=false;
+
 if(!sb)sb=supabase.createClient(SB_URL,SB_KEY);
 if(ch)await sb.removeChannel(ch);
-ch=sb.channel("pong-online-"+code,{config:{broadcast:{ack:true,self:false}}});
+
+ch=sb.channel("pong-online-"+roomCode,{
+config:{broadcast:{ack:true,self:false}}
+});
 
 ch.on("broadcast",{event:"join"},async()=>{
 if(role==="host"){
-status("✅ دوستت وارد اتاق شد! شروع مسابقه...");
-await ch.send({type:"broadcast",event:"start",payload:{host:true}})
+status("✅ دوستت وارد اتاق شد! بازی شروع می‌شود...");
+startOnlineGame("host");
+await ch.send({
+type:"broadcast",
+event:"start",
+payload:{host:true}
+})
 }
 });
+
 ch.on("broadcast",{event:"start"},()=>{
 if(role==="guest"){
-online=true;status("✅ وصل شدید! بازی شروع شد.");
+online=true;
+status("✅ وصل شدید! بازی شروع شد.");
 startOnlineGame("guest")
 }
 });
+
 ch.on("broadcast",{event:"input"},({payload})=>{
-if(role==="host")guestX=Math.max(0,Math.min(1,Number(payload.x)||.5))
+if(role==="host"){
+guestX=Math.max(0,Math.min(1,Number(payload.x)||.5))
+}
 });
+
 ch.on("broadcast",{event:"state"},({payload})=>{
 if(role==="guest")renderOnlineState(payload)
 });
+
 ch.on("broadcast",{event:"point"},({payload})=>{
 if(role==="guest")showOnlinePoint(payload)
 });
+
 ch.subscribe(st=>{
 if(st==="SUBSCRIBED"){
-if(role==="host")status("✅ اتاق ساخته شد! کد را برای دوستت بفرست.");
-else{
+if(role==="host"){
+status("✅ اتاق ساخته شد! کد را برای دوستت بفرست.")
+}else{
 status("⏳ درخواست ورود ارسال شد...");
-ch.send({type:"broadcast",event:"join",payload:{guest:true}})
+ch.send({
+type:"broadcast",
+event:"join",
+payload:{guest:true}
+})
 }
-}else if(st==="CHANNEL_ERROR")status("❌ اتصال به سرویس آنلاین ناموفق بود.");
-else if(st==="TIMED_OUT")status("❌ زمان اتصال تمام شد.")
+}else if(st==="CHANNEL_ERROR"){
+status("❌ اتصال به سرویس آنلاین ناموفق بود.")
+}else if(st==="TIMED_OUT"){
+status("❌ زمان اتصال تمام شد.")
+}
 })
 }
 
 $("ppCreate").onclick=()=>{
-const c=code();$("ppCode").textContent=c;
+const c=code();
+$("ppCode").textContent=c;
 $("ppRoomBox").style.display="block";
-status("⏳ در حال ساخت اتاق...");setup(c,"host")
+status("⏳ در حال ساخت اتاق...");
+setup(c,"host")
 };
+
 $("ppJoin").onclick=()=>{
 const c=$("ppJoinInput").value.trim().toUpperCase();
-if(c.length!==5){status("❌ کد باید ۵ کاراکتر باشد.");return}
-$("ppCode").textContent=c;$("ppRoomBox").style.display="block";
-status("⏳ در حال ورود...");setup(c,"guest")
+
+if(c.length!==5){
+status("❌ کد باید ۵ کاراکتر باشد.");
+return
+}
+
+$("ppCode").textContent=c;
+$("ppRoomBox").style.display="block";
+status("⏳ در حال ورود...");
+setup(c,"guest")
 };
+
 $("ppCopy").onclick=async()=>{
 const c=$("ppCode").textContent;
-try{await navigator.clipboard.writeText(c);status("✅ کد کپی شد.")}
-catch(e){status("کد اتاق: "+c)}
+
+try{
+await navigator.clipboard.writeText(c);
+status("✅ کد کپی شد.")
+}catch(e){
+status("کد اتاق: "+c)
+}
 };
+
 $("ppBack").onclick=close;
 
 const openBtn=document.createElement("button");
-openBtn.id="ppOnlineOpen";openBtn.type="button";
+openBtn.id="ppOnlineOpen";
+openBtn.type="button";
 openBtn.textContent="🌐 آنلاین با دوست";
-openBtn.onclick=open;document.body.appendChild(openBtn);
+openBtn.onclick=open;
+document.body.appendChild(openBtn);
 
-let oc,ctx,ow=720,oh=420,ball,p1,p2,score1=0,score2=0,last=0,raf=0;
+let oc,ctx,ow=720,oh=420,
+ball,p1,p2,score1=0,score2=0,lastOnline=0,rafOnline=0;
 
 function ensureOnlineCanvas(){
 if(oc)return;
-oc=document.createElement("canvas");oc.width=ow;oc.height=oh;
-oc.style.cssText="position:fixed;inset:0;margin:auto;width:min(94vw,720px);height:auto;z-index:2147483500;background:#080808;border-radius:16px;touch-action:none;display:none";
-document.body.appendChild(oc);ctx=oc.getContext("2d");
+
+oc=document.createElement("canvas");
+oc.width=ow;
+oc.height=oh;
+
+oc.style.cssText=
+"position:fixed;inset:0;margin:auto;width:min(94vw,720px);height:auto;z-index:2147483500;background:#080808;border-radius:16px;touch-action:none;display:none";
+
+document.body.appendChild(oc);
+ctx=oc.getContext("2d");
+
 oc.addEventListener("pointermove",e=>{
 const r=oc.getBoundingClientRect();
+
 localX=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
-if(role==="guest"&&ch)ch.send({type:"broadcast",event:"input",payload:{x:localX}})
+
+if(role==="guest"&&ch){
+ch.send({
+type:"broadcast",
+event:"input",
+payload:{x:localX}
+})
+}
 });
+
 oc.addEventListener("touchmove",e=>{
 const t=e.touches[0],r=oc.getBoundingClientRect();
+
 localX=Math.max(0,Math.min(1,(t.clientX-r.left)/r.width));
-if(role==="guest"&&ch)ch.send({type:"broadcast",event:"input",payload:{x:localX}});
+
+if(role==="guest"&&ch){
+ch.send({
+type:"broadcast",
+event:"input",
+payload:{x:localX}
+})
+}
+
 e.preventDefault()
 },{passive:false})
 }
-function resetBall(dir){ball={x:.5,y:.5,vx:(Math.random()>.5?1:-1)*.42,vy:dir*.36}}
+
+function resetOnlineBall(dir){
+ball={
+x:.5,y:.5,
+vx:(Math.random()>.5?1:-1)*.42,
+vy:dir*.36
+}
+}
+
 function startOnlineGame(who){
-ensureOnlineCanvas();oc.style.display="block";
+ensureOnlineCanvas();
+oc.style.display="block";
 $("ppOnlineLayer").style.display="none";
-score1=0;score2=0;localX=.5;guestX=.5;resetBall(who==="host"?-1:1);
+
+score1=0;
+score2=0;
+localX=.5;
+guestX=.5;
+resetOnlineBall(who==="host"?-1:1);
+
 if(who==="host"){
-p1=.5;p2=.5;last=performance.now();
-cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)
+p1=.5;
+p2=.5;
+lastOnline=performance.now();
+cancelAnimationFrame(rafOnline);
+rafOnline=requestAnimationFrame(onlineLoop)
+}else{
+drawOnline()
 }
 }
-function loop(now){
-const dt=Math.min(.035,(now-last)/1000||.016);last=now;
-p1=guestX;p2=localX;
-ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;
-if(ball.x<.025){ball.x=.025;ball.vx=Math.abs(ball.vx)}
-if(ball.x>.975){ball.x=.975;ball.vx=-Math.abs(ball.vx)}
+
+function onlineLoop(now){
+if(role!=="host")return;
+
+const dt=Math.min(.035,(now-lastOnline)/1000||.016);
+lastOnline=now;
+
+p1=guestX;
+p2=localX;
+
+ball.x+=ball.vx*dt;
+ball.y+=ball.vy*dt;
+
+if(ball.x<.025){
+ball.x=.025;
+ball.vx=Math.abs(ball.vx)
+}
+
+if(ball.x>.975){
+ball.x=.975;
+ball.vx=-Math.abs(ball.vx)
+}
+
 const pad=.16;
+
 if(ball.y>.91&&Math.abs(ball.x-p2)<pad&&ball.vy>0){
-ball.y=.91;ball.vy=-Math.abs(ball.vy)*1.04;ball.vx+=(ball.x-p2)*.5
+ball.y=.91;
+ball.vy=-Math.abs(ball.vy)*1.04;
+ball.vx+=(ball.x-p2)*.5
 }
+
 if(ball.y<.09&&Math.abs(ball.x-p1)<pad&&ball.vy<0){
-ball.y=.09;ball.vy=Math.abs(ball.vy)*1.04;ball.vx+=(ball.x-p1)*.5
+ball.y=.09;
+ball.vy=Math.abs(ball.vy)*1.04;
+ball.vx+=(ball.x-p1)*.5
 }
-if(ball.y>1){score1++;resetBall(1);ch&&ch.send({type:"broadcast",event:"point",payload:{a:score1,b:score2}})}
-if(ball.y<0){score2++;resetBall(-1);ch&&ch.send({type:"broadcast",event:"point",payload:{a:score1,b:score2}})}
+
+if(ball.y>1){
+score1++;
+resetOnlineBall(1);
+ch&&ch.send({
+type:"broadcast",
+event:"point",
+payload:{a:score1,b:score2}
+})
+}
+
+if(ball.y<0){
+score2++;
+resetOnlineBall(-1);
+ch&&ch.send({
+type:"broadcast",
+event:"point",
+payload:{a:score1,b:score2}
+})
+}
+
 drawOnline();
-ch&&ch.send({type:"broadcast",event:"state",payload:{x:ball.x,y:ball.y,vx:ball.vx,vy:ball.vy,p1:p1,p2:p2,a:score1,b:score2}});
-raf=requestAnimationFrame(loop)
+
+if(ch){
+ch.send({
+type:"broadcast",
+event:"state",
+payload:{
+x:ball.x,y:ball.y,vx:ball.vx,vy:ball.vy,
+p1:p1,p2:p2,a:score1,b:score2
 }
+})
+}
+
+rafOnline=requestAnimationFrame(onlineLoop)
+}
+
 function drawOnline(){
-ctx.clearRect(0,0,ow,oh);ctx.fillStyle="#080808";ctx.fillRect(0,0,ow,oh);
-ctx.fillStyle="#fff";ctx.globalAlpha=.25;
-for(let y=0;y<oh;y+=20)ctx.fillRect(ow/2-2,y,4,10);
+if(!ctx||!ball)return;
+
+ctx.clearRect(0,0,ow,oh);
+ctx.fillStyle="#080808";
+ctx.fillRect(0,0,ow,oh);
+
+ctx.fillStyle="#fff";
+ctx.globalAlpha=.25;
+
+for(let y=0;y<oh;y+=20){
+ctx.fillRect(ow/2-2,y,4,10)
+}
+
 ctx.globalAlpha=1;
-ctx.fillStyle="#e00000";ctx.fillRect((p1*ow)-58,28,116,14);
-ctx.fillStyle="#3b82f6";ctx.fillRect((p2*ow)-58,oh-42,116,14);
-ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(ball.x*ow,ball.y*oh,10,0,Math.PI*2);ctx.fill();
-ctx.font="bold 28px Arial";ctx.fillText(score1,ow/2-45,65);ctx.fillText(score2,ow/2+25,65)
+
+ctx.fillStyle="#e00000";
+ctx.fillRect((p1*ow)-58,28,116,14);
+
+ctx.fillStyle="#3b82f6";
+ctx.fillRect((p2*ow)-58,oh-42,116,14);
+
+ctx.fillStyle="#fff";
+ctx.beginPath();
+ctx.arc(ball.x*ow,ball.y*oh,10,0,Math.PI*2);
+ctx.fill();
+
+ctx.font="bold 28px Arial";
+ctx.fillText(score1,ow/2-45,65);
+ctx.fillText(score2,ow/2+25,65)
 }
+
 function renderOnlineState(st){
-ensureOnlineCanvas();oc.style.display="block";
+ensureOnlineCanvas();
+oc.style.display="block";
 $("ppOnlineLayer").style.display="none";
+
 ball={x:st.x,y:st.y,vx:st.vx,vy:st.vy};
-p1=st.p1;p2=st.p2;score1=st.a;score2=st.b;drawOnline()
+p1=st.p1;
+p2=st.p2;
+score1=st.a;
+score2=st.b;
+
+drawOnline()
 }
-function showOnlinePoint(st){score1=st.a;score2=st.b}
+
+function showOnlinePoint(st){
+score1=st.a;
+score2=st.b
+}
 })();
 </script>
 </body>
